@@ -59,6 +59,18 @@ class FritzBox:
             self._sid = tree.findtext("SID").strip("0")
         return self._sid
 
+    async def is_otp_configured(self):
+        async with self._session.post(
+            TWOFACTOR_URL.format(self._host),
+            data={
+                "sid": self._sid,
+                "tfa_googleauth_info": "",
+                "no_sidrenew": "",
+            },
+        ) as response:
+            data = await response.json()
+        return data["googleauth"]["isConfigured"]
+
     async def list_sms(self):
         async with self._session.post(
             DATA_URL.format(self._host),

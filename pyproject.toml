@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyfritzsms"
-version = "0.1.1"
+version = "0.1.2"
 description = "Python library to send SMS via AVM FRITZ!Box"
 license = "Apache-2.0"
 authors = ["Marc Hoersken <info@marc-hoersken.de>"]
