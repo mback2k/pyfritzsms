@@ -23,8 +23,13 @@ class FritzBox:
             raise RuntimeError("TOTP secret is not set")
         return self._otp.now()
 
+    def _check_status(self, response):
+        if response.status != 200:
+            raise RuntimeError(f"Unexpected response from FritzBox: {response.status}")
+
     async def login(self, username: str, password: str):
         async with self._session.get(LOGIN_URL.format(self._host)) as response:
+            self._check_status(response)
             text = await response.text()
             tree = ElementTree.fromstring(text)
             challenge = tree.findtext("Challenge")
@@ -41,6 +46,7 @@ class FritzBox:
                 "response": response,
             },
         ) as response:
+            self._check_status(response)
             text = await response.text()
             tree = ElementTree.fromstring(text)
             self._sid = tree.findtext("SID").strip("0")
@@ -54,6 +60,7 @@ class FritzBox:
                 "logout": "1",
             },
         ) as response:
+            self._check_status(response)
             text = await response.text()
             tree = ElementTree.fromstring(text)
             self._sid = tree.findtext("SID").strip("0")
@@ -68,6 +75,7 @@ class FritzBox:
                 "no_sidrenew": "",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         return data["googleauth"]["isConfigured"]
 
@@ -79,6 +87,7 @@ class FritzBox:
                 "page": "smsList",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         messages = data["data"]["smsListData"]["messages"]
         return messages
@@ -93,6 +102,7 @@ class FritzBox:
                 "delete": "",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         if "sid" in data:
             self._sid = data["sid"]
@@ -111,6 +121,7 @@ class FritzBox:
                 "apply": "true",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         if "sid" in data:
             self._sid = data["sid"]
@@ -130,6 +141,7 @@ class FritzBox:
                 "second_apply": "",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         if "sid" in data:
             self._sid = data["sid"]
@@ -145,6 +157,7 @@ class FritzBox:
                 "no_sidrenew": "",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         if not data["googleauth"]["isConfigured"]:
             raise RuntimeError("TOTP is not configured")
@@ -160,6 +173,7 @@ class FritzBox:
                 "no_sidrenew": "",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         if data["err"] != 0:
             raise RuntimeError("TOTP is not valid")
@@ -173,6 +187,7 @@ class FritzBox:
                 "no_sidrenew": "",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         if not data["active"]:
             raise RuntimeError("TOTP is not active")
@@ -193,6 +208,7 @@ class FritzBox:
                 "twofactor": "",
             },
         ) as response:
+            self._check_status(response)
             data = await response.json()
         if "sid" in data:
             self._sid = data["sid"]
