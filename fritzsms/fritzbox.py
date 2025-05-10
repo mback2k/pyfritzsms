@@ -106,7 +106,7 @@ class FritzBox:
             data = await response.json()
         if "sid" in data:
             self._sid = data["sid"]
-        if data["data"]["delete"] != "ok":
+        if data["data"].get("delete") != "ok":
             raise RuntimeError("SMS could not be deleted")
 
     async def send_sms(self, number: str, message: str):
